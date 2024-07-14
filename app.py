@@ -19,18 +19,21 @@ def convert_to_h264(input_video_path, output_video_path):
     cmd = f"ffmpeg -y -i {input_video_path} -c:v libx264 {output_video_path}"
     subprocess.run(cmd, shell=True)
 
-def preprocess_frame(img):
+def get_time_from_frame(img):
     # Convert to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    
     # Apply thresholding
     _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
-    return thresh
-
-def get_time_from_frame(img):
-    img = preprocess_frame(img)
+    
+    # Use pytesseract to extract text
     custom_config = r'--oem 3 --psm 6'
-    text = pytesseract.image_to_string(img, config=custom_config)
-    print("OCR Text:", text)  # Debugging: Print the extracted text
+    text = pytesseract.image_to_string(thresh, config=custom_config)
+    
+    # Debug: print the extracted text
+    print("Extracted Text:", text)
+    
+    # Extract time pattern
     pattern = re.compile(r'\d{2}:\d{2}:\d{2}')
     res = pattern.search(text)
     if res:
@@ -55,36 +58,13 @@ def get_end_time(video_path):
         return get_time_from_frame(img)
     return None
 
-def get_video_start_time_from_csv(df, search_term):
-    # Filter based on search_term in Name, Company Name, Email, or Phone columns
-    filtered_rows = df[
-        df['Name'].str.contains(search_term, na=False, case=False) |
-        df['Company Name'].str.contains(search_term, na=False, case=False) |
-        df['Email'].str.contains(search_term, na=False, case=False) |
-        df['Phone'].str.contains(search_term, na=False, case=False)
-    ]
-
-    if not filtered_rows.empty:
-        # Get the first matching row
-        start_time = filtered_rows.iloc[0]['DATE AND TIME'].strftime('%H:%M:%S')
-        return start_time
-    else:
-        return None
-
-def suggest_values(search_term, df, columns):
-    suggestions = set()
-    for column in columns:
-        matches = df[df[column].str.contains(search_term, na=False, case=False)][column].tolist()
-        suggestions.update(matches)
-    return list(suggestions)
-
 def main():
     st.set_page_config(page_title="Video Player", page_icon="📹", layout="centered")
 
     st.title("Video Timestamp Extractor")
 
     uploaded_file = st.file_uploader("Upload a video file (MP4, AVI, MOV)", type=["mp4", "avi", "mov"])
-    uploaded_csv = r"C:\Users\chand\Downloads\dineshvne\opencvenv\csvsheetdb.csv" 
+    uploaded_csv = "./csvsheetdb.csv" 
 
     if uploaded_file:
         os.makedirs("./assets", exist_ok=True)
