@@ -19,9 +19,18 @@ def convert_to_h264(input_video_path, output_video_path):
     cmd = f"ffmpeg -y -i {input_video_path} -c:v libx264 {output_video_path}"
     subprocess.run(cmd, shell=True)
 
+def preprocess_frame(img):
+    # Convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # Apply thresholding
+    _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+    return thresh
+
 def get_time_from_frame(img):
+    img = preprocess_frame(img)
     custom_config = r'--oem 3 --psm 6'
     text = pytesseract.image_to_string(img, config=custom_config)
+    print("OCR Text:", text)  # Debugging: Print the extracted text
     pattern = re.compile(r'\d{2}:\d{2}:\d{2}')
     res = pattern.search(text)
     if res:
