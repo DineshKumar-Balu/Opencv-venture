@@ -15,6 +15,7 @@ else:
     pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 
 def convert_to_h264(input_video_path, output_video_path):
+    # Using ffmpeg to convert to H.264
     cmd = f"ffmpeg -y -i {input_video_path} -c:v libx264 {output_video_path}"
     subprocess.run(cmd, shell=True)
 
@@ -46,6 +47,7 @@ def get_end_time(video_path):
     return None
 
 def get_video_start_time_from_csv(df, search_term):
+    # Filter based on search_term in Name, Company Name, Email, or Phone columns
     filtered_rows = df[
         df['Name'].str.contains(search_term, na=False, case=False) |
         df['Company Name'].str.contains(search_term, na=False, case=False) |
@@ -54,6 +56,7 @@ def get_video_start_time_from_csv(df, search_term):
     ]
 
     if not filtered_rows.empty:
+        # Get the first matching row
         start_time = filtered_rows.iloc[0]['DATE AND TIME'].strftime('%H:%M:%S')
         return start_time
     else:
@@ -72,7 +75,7 @@ def main():
     st.title("Video Timestamp Extractor")
 
     uploaded_file = st.file_uploader("Upload a video file (MP4, AVI, MOV)", type=["mp4", "avi", "mov"])
-    uploaded_csv = st.file_uploader("Upload a CSV file", type=["csv"])
+    uploaded_csv = r"C:\Users\chand\Downloads\dineshvne\opencvenv\csvsheetdb.csv" 
 
     if uploaded_file:
         os.makedirs("./assets", exist_ok=True)
