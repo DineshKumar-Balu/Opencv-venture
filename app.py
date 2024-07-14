@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import datetime
 import os
 import platform
+import subprocess 
 
 # Set Tesseract path for Linux (Streamlit Cloud runs on Linux)
 if platform.system() == 'Windows':
