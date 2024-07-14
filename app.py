@@ -6,9 +6,12 @@ import pandas as pd
 from datetime import datetime
 import os
 import subprocess
+import platform
 
-# Set Tesseract path (adjust as per your installation)
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+if platform.system() == 'Windows':
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+elif platform.system() == 'Linux':
+    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 
 def convert_to_h264(input_video_path, output_video_path):
     # Using ffmpeg to convert to H.264
